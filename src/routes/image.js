@@ -24,7 +24,7 @@ router.get('/', (req, res) => {
 
 
 // Uploading the images
-router.post('/upload', multipleUpload, (req, res) => {
+router.post('/api/upload', multipleUpload, (req, res) => {
     const bucketName = req.body.bucketName;
     // console.log("REq: ", req.files);
     // console.log("Name: ", bucketName);
@@ -58,7 +58,7 @@ router.post('/upload', multipleUpload, (req, res) => {
 })
 
 // Creating the bucket
-router.post('/create', (req, res) => {
+router.post('/api/create', (req, res) => {
     let params = {
         Bucket: req.body.bucketName
     }
@@ -73,7 +73,7 @@ router.post('/create', (req, res) => {
 })
 
 // Showing all the buckets
-router.get('/all-buckets', (req, res) => {
+router.get('/api/all-buckets', (req, res) => {
     s3.listBuckets((err, data) => {
         if(err) {
             res.status(500).send(err);
@@ -85,7 +85,7 @@ router.get('/all-buckets', (req, res) => {
 })
 
 // Showing elemnets from the bucket
-router.post('/all-images', (req, res) => {
+router.post('/api/all-images', (req, res) => {
     let params = {
         Bucket: req.body.bucketName
     }
