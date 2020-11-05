@@ -5,6 +5,7 @@ const multer = require('multer');
 const keys = require('../../key');
 
 const AWS = require('aws-sdk');
+AWS.config.update({ region: 'ap-south-1' });
 const s3 = new AWS.S3({
     accessKeyId: keys.iam_access_id,
     secretAccessKey: keys.iam_secret
@@ -57,19 +58,45 @@ router.post('/upload', multipleUpload, (req, res) => {
     
 })
 
-// Creating the bucket
+// Creating the bucket with policy
 router.post('/create', (req, res) => {
     let params = {
         Bucket: req.body.bucketName
     }
-    s3.createBucket(params, (err, data) => {
+    let publicBucketPolicy = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "PublicRead",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": [
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                ],
+                "Resource": "arn:aws:s3:::"+params.Bucket+"/*"
+            }
+        ]
+    }
+    s3.createBucket(params, async(err, data) => {
         if(err) {
             res.status(500).send(err);
         }
         else {
-            res.status(200).send(data);
+            params.Policy = JSON.stringify(publicBucketPolicy);
+            s3.putBucketPolicy(params, (error, msg) => {
+                if(err) {
+                    res.status(500).send({error: error, response: "Bucket Created but Its Policy not saved" });
+                }
+                else {
+                    res.status(200).send(data);
+                }
+            })
+            // res.status(200)
+            // res.status(200).send(data);
         }
     })
+
 })
 
 // Showing all the buckets
